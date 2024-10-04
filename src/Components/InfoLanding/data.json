@@ -1,0 +1,83 @@
+[
+    {  "id":1,
+      "Disorder": "Premenstrual Syndrome",
+       "Remedies": [
+          {
+            "Name": "Antidepressants",
+            "Description": "Selective serotonin reuptake inhibitors (SSRIs) — which include fluoxetine (Prozac), paroxetine (Paxil, Pexeva), sertraline (Zoloft) and others — have been successful in reducing mood symptoms. SSRIs are the first-line treatment for severe PMS or premenstrual dysphoric disorder (PMDD). These medications are generally taken daily. But for some women with PMS, use of antidepressants may be limited to the two weeks before menstruation begins."
+          },
+          {
+            "Name": "Nonsteroidal anti-inflammatory drugs (NSAIDs)",
+            "Description": "Taken before or at the onset of your period, nonsteroidal anti-inflammatory drugs (NSAIDs) such as ibuprofen (Advil, Motrin IB, others) or naproxen sodium (Aleve) can ease cramping and breast discomfort."
+          },
+          {
+            "Name": "Diuretics",
+            "Description": "When exercise and limiting salt intake aren't enough to reduce the weight gain, swelling and bloating of PMS, taking water pills (diuretics) can help your body shed excess fluid through your kidneys. Spironolactone (Aldactone) is a diuretic that can help ease some of the symptoms of PMS."
+          }
+        ],
+        "DietSuggestions": [
+          "Increase intake of fruits and vegetables",
+          "Reduce caffeine and alcohol consumption",
+          "Eat small, frequent meals to stabilize blood sugar levels"
+        ],
+        "ExerciseVideoURLs": [
+          "https://www.youtube.com/watch?v=2X78NWuRfJU&t=25s",
+          "https://www.youtube.com/watch?v=5JvbjrLESPs&t=17s",
+          "https://www.youtube.com/watch?v=5JvbjrLESPs&t=17s"
+        ]
+    },
+    { "id":2,
+      "Disorder": "PCOD/PCOS",
+        "Remedies": [
+          {
+            "Name": "Hormonal birth control",
+            "Description": "Birth control pills, patches, or other hormonal contraceptives can regulate menstrual cycles and reduce symptoms."
+          },
+          {
+            "Name": "Anti-androgen medications",
+            "Description": "Medications like spironolactone (Aldactone) can help reduce symptoms related to excess androgens, such as acne and excessive hair growth."
+          },
+          {
+            "Name": "Metformin",
+            "Description": "This medication is commonly used to treat insulin resistance associated with PCOS and can help regulate menstrual cycles and improve fertility."
+          }
+        ],
+        "DietSuggestions": [
+          "Focus on whole, nutrient-dense foods",
+          "Limit refined carbohydrates and sugars",
+          "Include lean proteins and healthy fats in your diet"
+        ],
+        "ExerciseVideoURLs": [
+          "https://www.youtube.com/watch?v=GTVvhMPSoE8&t=10s",
+          "https://www.youtube.com/watch?v=4xrDxxg5jv4&t=1s",
+          "https://www.youtube.com/watch?v=5JvbjrLESPs&t=16s"
+        ]
+      },
+    { "id":3,
+      "Disorder": "Irregular periods",
+        "Remedies": [
+          {
+            "Name": "Oral contraceptives",
+            "Description": "Birth control pills can regulate menstrual cycles and make periods more predictable."
+          },
+          {
+            "Name": "Hormone therapy",
+            "Description": "In cases where hormonal imbalances are causing irregular periods, hormone therapy may be prescribed to regulate hormone levels."
+          },
+          {
+            "Name": "Lifestyle changes",
+            "Description": "Maintaining a healthy weight, managing stress, and getting regular exercise can help regulate menstrual cycles."
+          }
+        ],
+        "DietSuggestions": [
+          "Eat a balanced diet with plenty of fruits, vegetables, whole grains, and lean proteins",
+          "Limit processed foods and sugars",
+          "Stay hydrated by drinking plenty of water"
+        ],
+        "ExerciseVideoURLs": [
+          "https://www.youtube.com/watch?v=DJ7EusKCMWE&t=10s",
+          "https://www.youtube.com/watch?v=GJDyEdRZLIU&t=1s",
+          "https://www.youtube.com/watch?v=JUnZQ38kdak&t=15s"
+        ]
+      }
+    ]

@@ -1,0 +1,36 @@
+body{
+    max-width: 100%;
+}
+.container {
+    width: 1500px; /* Ensure the container spans the full width of the page */
+  /*  background-color: hsl(352, 91%, 79%); /* Light red background color */
+    /* padding: 50px; */
+    height: 800px;
+
+  }
+  
+  .hospital-list {
+    border-radius: 8px;
+    font-family: Arial, sans-serif; /* Choose a good font style */
+    /* background-color: blueviolet; */
+    height: 600px;
+  }
+  
+  .hospital-list ol {
+    /* list-style-type: none; Remove default list styling */
+    column-gap: 2rem;
+	column-rule: 4px dotted turquoise;
+  }
+  
+  .hospital-list ol li {
+    margin-bottom: 8px; /* Add some spacing between list items */
+    margin-left: 80px;
+    font-weight: 200;
+    font-size: 1.5rem;
+  }
+  .head1{
+  color: rgb(110, 105, 105);
+    margin-left: 350px;
+    font-weight: 600;
+    font-size: 3.15rem;
+  }
