@@ -1,91 +1,131 @@
-import React, { useState } from 'react';
-import Calendar from 'react-calendar';
-import Moment from "react-moment";
-import Navbar from '../Main/Navbar';
-import AboutBackground from "../../Assets/bg2whole.jpg";
-import './Tracker.css';
-const Tracker = () => {
-  const [value, onChange] = useState(new Date());
-  const [cycle, cycleValue] = useState("28");
 
-  const date = value;
-  console.log(cycle);
-  const cycleLength = parseInt(cycle);
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet';
+import L, { Icon } from 'leaflet';
+import { useEffect, useState } from "react";
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png')
+});
+
+const foodIcon = new Icon({
+  iconUrl: 'https://img.icons8.com/doodle/48/apple.png',
+  iconSize: [35, 35],
+  iconAnchor: [22, 94],
+  popupAnchor: [-3, -76]
+});
+
+const housingIcon = new Icon({
+  iconUrl: 'https://img.icons8.com/plasticine/100/exterior.png',
+  iconSize: [38, 45],
+  iconAnchor: [22, 94],
+  popupAnchor: [-3, -76]
+});
+
+const healthIcon = new Icon({
+  iconUrl: 'https://img.icons8.com/doodle/48/heart-with-pulse.png',
+  iconSize: [35, 35],
+  iconAnchor: [22, 94],
+  popupAnchor: [-3, -76]
+});
+
+const Sub = ({ hos, sel, setsel }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (sel !== -1) {
+      map.setView([hos[sel].lat, hos[sel].lon], 16); // Zoom level set to 16 for 4x zoom
+    }
+  }, [sel]);
 
   return (
-    <div>
-      <Navbar />
-      <div className="about-background-image-container">
-        <img src={AboutBackground} alt="" />
-      </div>
+    <>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-      <div className="text-center">
-
-        <h4>Calculate Next period, Ovulation Day</h4>
-
-        <label for="cycle">Select your Cycle Length : </label>
-        <select
-          onChange={(e) => cycleValue(e.target.value)}
-          defaultValue={cycle}
-          className="m-2"
+      {hos.map((h, idx) => (
+        <Marker
+          position={[h.lat, h.lon]}
+          onClick={() => {
+            setsel(idx);
+          }}
+          icon={idx === sel ? healthIcon : housingIcon}
+          key={idx}
         >
-          <option value="28">28</option>
-          <option value="29">29</option>
-          <option value="30">30</option>
-          <option value="31">31</option>
-          <option value="32">32</option>
-          <option value="33">33</option>
-          <option value="34">34</option>
-          <option value="35">35</option>
-          <option value="36">36</option>
-          <option value="37">37</option>
-          <option value="38">38</option>
-          <option value="39">39</option>
-          <option value="40">40</option>
-          <option value="41">41</option>
-          <option value="42">42</option>
-          <option value="43">43</option>
-          <option value="44">44</option>
-          <option value="45">45</option>
-        </select>
-      </div>
-
-      <p className="text-center">
-
-        Select Your Last Period Start Date from the Calendar
-      </p>
-
-      <div className="d-flex justify-content-center ">
-
-        <Calendar onChange={onChange} value={value}
-          className="calendar mt-0" />
-      </div>
-
-      <div className="text-center mt-4 p-2">
-        <div className="row">
-          <div class="d-flex justify-content-center">
-            <div className="col-md-3 m-3 box ">
-              <p>Next Period</p>
-
-              <Moment format="Do MMMM YYYY"
-                add={{ days: cycleLength - 1 }}>
-                {date}
-              </Moment>
-            </div>
-            <div className="col-md-3 m-3 box ">
-              <p> Approximate Ovulation Day</p>
-
-              <Moment
-                format="Do MMMM YYYY"
-                add={{ days: cycleLength - 1 - 14 }}
-              >
-                {date}
-              </Moment>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Popup>{h.name}</Popup>
+        </Marker>
+      ))}
+    </>
   );
-}
-export default Tracker;
+};
+
+const Nh = () => {
+  const [clat, setClat] = useState(null);
+  const [clon, setClon] = useState(null);
+  const [hos, setHos] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState(-1);
+
+  const fetchHospitals = async (lat, lon) => {
+    const radius = 5000; // Radius in meters
+    const query = `
+            [out:json];
+            node["amenity"="hospital"](around:${radius}, ${lat}, ${lon});
+            out;
+        `;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.elements.map(hospital => ({
+      name: hospital.tags.name || "Unnamed Hospital",
+      lat: hospital.lat,
+      lon: hospital.lon,
+    }));
+  };
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      async location => {
+        const { latitude, longitude } = location.coords;
+        setClat(latitude);
+        setClon(longitude);
+        const hospitalData = await fetchHospitals(latitude, longitude);
+        setHos(hospitalData);
+      },
+      error => console.error("Error fetching location:", error),
+      { enableHighAccuracy: true }
+    );
+  }, []);
+
+  if (clat && clon) {
+    return (
+      <>
+        <MapContainer
+          center={[clat, clon]}
+          zoom={12}
+          scrollWheelZoom={false}
+          style={{ height: '300px', width: '1000px' }}
+        >
+          <Marker position={[clat, clon]} icon={foodIcon}>
+            <Popup>Current Location</Popup>
+          </Marker>
+          <Sub hos={hos} sel={selectedHospital} setsel={setSelectedHospital} />
+        </MapContainer>
+
+        {hos.map((h, idx) => (
+          <h1 key={idx} onClick={() => setSelectedHospital(idx)}>{h.name}</h1>
+        ))}
+      </>
+    );
+  }
+
+  return null;
+};
+
+export default Nh;
