@@ -1,93 +1,131 @@
-import React, { useEffect, useState } from 'react';
-import GoogleMapReact from 'google-map-react';
-import './NearestHospital.css'; // Import CSS file for styling
 
-const NearestDoctor = () => {
-  const [center, setCenter] = useState(null);
-  const [zoom, setZoom] = useState(10);
-  const [hospitals, setHospitals] = useState([]);
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet';
+import L, { Icon } from 'leaflet';
+import { useEffect, useState } from "react";
 
-  const apiKey = "";
+delete L.Icon.Default.prototype._getIconUrl;
 
-  const fetchHospitals = async (latitude, longitude) => {
-    let url = `api/place/nearbysearch/json?location=${latitude},${longitude}&radius=5000&type=hospital&key=${apiKey}&libraries=places`;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png')
+});
 
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        if (data.results && data.results.length > 0) {
-          setHospitals(data.results);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching hospitals:', error);
-      });
+const foodIcon = new Icon({
+  iconUrl: 'https://img.icons8.com/doodle/48/apple.png',
+  iconSize: [35, 35],
+  iconAnchor: [22, 94],
+  popupAnchor: [-3, -76]
+});
 
-  };
+const housingIcon = new Icon({
+  iconUrl: 'https://img.icons8.com/plasticine/100/exterior.png',
+  iconSize: [38, 45],
+  iconAnchor: [22, 94],
+  popupAnchor: [-3, -76]
+});
+
+const healthIcon = new Icon({
+  iconUrl: 'https://img.icons8.com/doodle/48/heart-with-pulse.png',
+  iconSize: [35, 35],
+  iconAnchor: [22, 94],
+  popupAnchor: [-3, -76]
+});
+
+const Sub = ({ hos, sel, setsel }) => {
+  const map = useMap();
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCenter({ lat: latitude, lng: longitude });
-          setZoom(15);
-          fetchHospitals(latitude, longitude);
-        },
-        (error) => {
-          console.error('Error getting user location:', error);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
+    if (sel !== -1) {
+      map.setView([hos[sel].lat, hos[sel].lon], 16); // Zoom level set to 16 for 4x zoom
     }
-  }, []);
-
+  }, [sel]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-
-      {center && (
-        <div style={{ height: '50vh', width: '100%' }}>
-          <GoogleMapReact
-            bootstrapURLKeys={{ key: apiKey }}
-            center={center}
-            zoom={zoom}
-            yesIWantToUseGoogleMapApiInternals
-          >
-            {hospitals.map((hospital, index) => (
-              <Marker
-                key={index}
-                lat={hospital.geometry.location.lat}
-                lng={hospital.geometry.location.lng}
-                text={hospital.name}
-              />
-            ))}
-            <Marker
-              lat={center.lat}
-              lng={center.lng}
-              text="My Location"
-            />
-          </GoogleMapReact>
-        </div>
-      )}
-
-
-      <div className="container"> {/* Container for the list */}
-        <div className="hospital-list"> {/* Apply CSS class for styling */}
-          <h2 className='head1'>Nearest Hospitals:</h2>
-          <ol>
-            {hospitals.map((hospital, index) => (
-              <li key={index}>{hospital.name}</li>
-            ))}
-          </ol>
-        </div>
-      </div>
-    </div>
+      {hos.map((h, idx) => (
+        <Marker
+          position={[h.lat, h.lon]}
+          onClick={() => {
+            setsel(idx);
+          }}
+          icon={idx === sel ? healthIcon : housingIcon}
+          key={idx}
+        >
+          <Popup>{h.name}</Popup>
+        </Marker>
+      ))}
+    </>
   );
 };
 
-const Marker = () => <div style={{ width: '20px', height: '20px', backgroundColor: 'red', borderRadius: '40%' }} />;
+const Nh = () => {
+  const [clat, setClat] = useState(null);
+  const [clon, setClon] = useState(null);
+  const [hos, setHos] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState(-1);
 
-export default NearestDoctor;
+  const fetchHospitals = async (lat, lon) => {
+    const radius = 5000; // Radius in meters
+    const query = `
+            [out:json];
+            node["amenity"="hospital"](around:${radius}, ${lat}, ${lon});
+            out;
+        `;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.elements.map(hospital => ({
+      name: hospital.tags.name || "Unnamed Hospital",
+      lat: hospital.lat,
+      lon: hospital.lon,
+    }));
+  };
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      async location => {
+        const { latitude, longitude } = location.coords;
+        setClat(latitude);
+        setClon(longitude);
+        const hospitalData = await fetchHospitals(latitude, longitude);
+        setHos(hospitalData);
+      },
+      error => console.error("Error fetching location:", error),
+      { enableHighAccuracy: true }
+    );
+  }, []);
+
+  if (clat && clon) {
+    return (
+      <>
+        <MapContainer
+          center={[clat, clon]}
+          zoom={12}
+          scrollWheelZoom={false}
+          style={{ height: '300px', width: '1000px' }}
+        >
+          <Marker position={[clat, clon]} icon={foodIcon}>
+            <Popup>Current Location</Popup>
+          </Marker>
+          <Sub hos={hos} sel={selectedHospital} setsel={setSelectedHospital} />
+        </MapContainer>
+
+        {hos.map((h, idx) => (
+          <h1 key={idx} onClick={() => setSelectedHospital(idx)}>{h.name}</h1>
+        ))}
+      </>
+    );
+  }
+
+  return null;
+};
+
+export default Nh;
