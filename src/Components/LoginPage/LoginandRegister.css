@@ -13,6 +13,11 @@ body {
 
   background-image: url("../../Assets/bottom1.jpg");
   height: 100vh;
+  /* If needed t revert */
+
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center top;
 }
 
 .bo2 {
