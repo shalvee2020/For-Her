@@ -20,7 +20,7 @@ const Navbar = () => {
   return <nav> <div className="nav-logo-container">
     <img src={Logo} alt="" id='log' />
     <div className='head'>
-      <h2 className='loghead'>EmpowerHer</h2>
+      <h2 className='loghead'>For-Her</h2>
     </div>
   </div>
     <div className="navbar-links-container">
