@@ -2,6 +2,9 @@ import React from 'react'
 import BannerBackground from "../../Assets/bghome1.jpg";
 import BannerImage from "../../Assets/fallopian tube.jpg";
 import Navbar from '../Main/Navbar';
+import About from './About';
+import Contact from './Contact';
+import Work from './Work';
 const Home = () => {
   return <div className='home-container'>
     <Navbar />
@@ -23,6 +26,9 @@ const Home = () => {
         />
       </div>
     </div>
+    <About />
+    <Work />
+    <Contact />
   </div>;
 };
 
