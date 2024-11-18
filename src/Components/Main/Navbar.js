@@ -24,7 +24,7 @@ const Navbar = () => {
     </div>
   </div>
     <div className="navbar-links-container">
-      <a href='/home'>Home</a>
+      <a href='/'>Home</a>
       <Link to="/about">About</Link>
     
       <button className="primary-button" onClick={handleClick}>Login/Sign Up</button>
