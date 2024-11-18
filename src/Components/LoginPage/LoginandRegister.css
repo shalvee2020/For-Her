@@ -30,6 +30,8 @@ body {
 .row {
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
   gap: 0px;
   margin-bottom: 30px;
   color: rgb(62, 59, 59);
