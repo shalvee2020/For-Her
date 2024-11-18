@@ -25,7 +25,7 @@ function PasswordLogin() {
                     <Route path='/doctor' element={<NearestHospital />}></Route>
                     <Route path='/about' element={<About />}></Route>
                     
-                    <Route path='/home' element={<Home />}></Route>
+                   
                     
                 </Routes>
             </div>
