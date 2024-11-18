@@ -26,9 +26,7 @@ const Navbar = () => {
     <div className="navbar-links-container">
       <a href='/home'>Home</a>
       <Link to="/about">About</Link>
-      <Link to='/chat'>Chat</Link>
-      {/* <a href="">Disease</a>
-        <a href="">Tracker</a> */}
+    
       <button className="primary-button" onClick={handleClick}>Login/Sign Up</button>
     </div>
   </nav>;
