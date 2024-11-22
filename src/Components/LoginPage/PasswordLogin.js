@@ -9,7 +9,7 @@ import Tracker from '../Tracker/Tracker'
 // import NearestDoctor from './NearestDoctor'
 import About from '../Main/About'
 import Home from '../Main/Home'
-// import Chat from '../Main/Chat'
+import Chat from '../Main/Chat'
 // import ChatWithAI from '../Main/ChatwithAI'
 import NearestHospital from '../NerarestHospital/NearestHospital'
 function PasswordLogin() {
@@ -24,9 +24,10 @@ function PasswordLogin() {
                     <Route path='/tracker' element={<Tracker />}></Route>
                     <Route path='/doctor' element={<NearestHospital />}></Route>
                     <Route path='/about' element={<About />}></Route>
-                    
-                   
-                    
+                    <Route path='/chat' element={<Chat />}></Route>
+
+
+
                 </Routes>
             </div>
         </BrowserRouter>
