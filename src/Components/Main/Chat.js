@@ -7,8 +7,8 @@ import {
     orderBy,
     onSnapshot,
     deleteDoc,
-    doc,
 } from "firebase/firestore";
+import { Filter } from "bad-words"; // Importing bad-words library
 import "./chat.css";
 
 const ChatApp = () => {
@@ -64,6 +64,14 @@ const ChatApp = () => {
         if (!displayName.trim()) {
             alert("Please set your display name first.");
             handleSetDisplayName();
+            return;
+        }
+
+        const filter = new Filter();
+
+        // Check for bad words
+        if (filter.isProfane(newMessage)) {
+            alert("Your message contains inappropriate language.");
             return;
         }
 
@@ -153,4 +161,3 @@ const ChatApp = () => {
 };
 
 export default ChatApp;
-
