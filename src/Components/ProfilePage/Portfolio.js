@@ -32,6 +32,9 @@ function Portfolio() {
     const handleDoctor = () => {
         navigate('/doctor');
     };
+    const handleChat = () => {
+        navigate('/chat');
+    };
 
     return (
         <>
@@ -40,6 +43,7 @@ function Portfolio() {
                     <button className='button-89' onClick={handleTracker}>Tracker</button>
                     <button className='button-89' onClick={handleInfo}>Info</button>
                     <button className='button-89' onClick={handleDoctor}>Nearest Hospital</button>
+                    <button className='button-89' onClick={handleChat}>Chat</button>
                     <button className='button-89' onClick={handleClick}>Sign Out</button>
                 </div>
                 <main>
