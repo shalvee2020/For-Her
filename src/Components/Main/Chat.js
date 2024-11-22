@@ -1,121 +1,156 @@
-// import React from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import Navbar from './Navbar'; // Import your existing Navbar component
+import React, { useState, useEffect } from "react";
+import { database, auth } from "../../firebase";
+import {
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    onSnapshot,
+    deleteDoc,
+    doc,
+} from "firebase/firestore";
+import "./chat.css";
 
-// const Chat = () => {
-//     const navigate = useNavigate(); // For navigation within your React app
+const ChatApp = () => {
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [displayName, setDisplayName] = useState("");
 
-//     const handleAIChat = () => {
-//         navigate('#'); // Replace with the actual route if needed
-//     };
-
-//     const handleFellowMatesChat = () => {
-//         window.location.href = 'https://chlobaatkare.onrender.com'; // External URL
-//     };
-
-//     return (
-//         <div style={styles.page}>
-//             <Navbar /> {/* Using the existing Navbar component */}
-//             <div style={styles.container}>
-//                 <h1>Who do you want to talk to?</h1>
-//                 <button style={styles.button} onClick={handleAIChat}>Talk to AI</button>
-//                 <button style={styles.button} onClick={handleFellowMatesChat}>Talk to Fellow Mates</button>
-//             </div>
-//         </div>
-//     );
-// };
-
-// // Inline CSS styles
-// const styles = {
-//     page: {
-//         position: 'relative',
-//         height: '100vh',
-//     },
-//     container: {
-//         display: 'flex',
-//         flexDirection: 'column',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         height: '100vh',
-//     },
-//     button: {
-//         padding: '10px 20px',
-//         margin: '10px',
-//         fontSize: '16px',
-//         cursor: 'pointer',
-//     }
-// };
-
-// export default Chat;
-
-
-
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from './Navbar'; // Import your existing Navbar component
-import './chat.css'; // Import the separate CSS file
-
-const Chat = () => {
-    const navigate = useNavigate(); // For navigation within your React app
-    const [roomId, setRoomId] = useState(''); // To store and display the selected room ID
-    const [shouldRedirect, setShouldRedirect] = useState(false); // To control the redirection
-
-    const handleAIChat = () => {
-        navigate('/ai'); // Replace with the actual route if needed
-    };
-
-    const handleFellowMatesChat = () => {
-        setRoomId('General'); // Example room ID for general chat
-        setShouldRedirect(true); // Trigger redirection after 3 seconds
-    };
-
-    // Specific task handlers for periods-related topics
-    const handleCrampsChat = () => {
-        setRoomId('CRAMPS123'); // Example room ID for Cramps
-        setShouldRedirect(true); // Trigger redirection after 3 seconds
-    };
-
-    const handlePeriodsRelatedChat = () => {
-        setRoomId('PERIODS456'); // Example room ID for Periods-related discussions
-        setShouldRedirect(true); // Trigger redirection after 3 seconds
-    };
-
-    // Effect to handle the 3-second delay before redirecting
     useEffect(() => {
-        if (shouldRedirect) {
-            const timer = setTimeout(() => {
-                window.location.href = 'https://chlobaatkare.onrender.com'; // Redirect to the external page after 3 seconds
-            }, 3000);
-            return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
+        // Monitor authentication state
+        const unsubscribeAuth = auth.onAuthStateChanged((currentUser) => {
+            if (currentUser) {
+                setUser(currentUser);
+                setDisplayName(currentUser.displayName || "");
+            } else {
+                setUser(null);
+            }
+        });
+        const q = query(collection(database, "messages"), orderBy("createdAt", "asc"));
+        const unsubscribeMessages = onSnapshot(q, (snapshot) => {
+            const fetchedMessages = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setMessages(fetchedMessages.slice(-200));
+        });
+
+        return () => {
+            unsubscribeAuth();
+            unsubscribeMessages();
+        };
+    }, []);
+
+    const handleSetDisplayName = () => {
+        if (!displayName.trim()) {
+            const name = prompt("Please enter your display name:");
+            if (name) {
+                setDisplayName(name.trim());
+            }
         }
-    }, [shouldRedirect]);
+    };
+
+    const sendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim()) return;
+
+        if (!user) {
+            alert("You need to be logged in to send messages.");
+            return;
+        }
+
+        if (!displayName.trim()) {
+            alert("Please set your display name first.");
+            handleSetDisplayName();
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await addDoc(collection(database, "messages"), {
+                text: newMessage,
+                createdAt: new Date(),
+                uid: user.uid,
+                displayName: displayName || "Anonymous",
+            });
+            setNewMessage("");
+        } catch (error) {
+            console.error("Error sending message:", error);
+            alert("Failed to send the message. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const clearMessages = async () => {
+        const confirm = window.confirm(
+            "Are you sure you want to clear all messages?"
+        );
+        if (!confirm) return;
+
+        try {
+            const q = query(collection(database, "messages"));
+            const snapshot = await onSnapshot(q, async (snapshot) => {
+                for (const doc of snapshot.docs) {
+                    await deleteDoc(doc.ref);
+                }
+            });
+            alert("All messages cleared!");
+        } catch (error) {
+            console.error("Error clearing messages:", error);
+            alert("Failed to clear messages. Please try again.");
+        }
+    };
 
     return (
-        <div className="chat-page">
-            <Navbar /> {/* Using the existing Navbar component */}
-            <div className="chat-container">
-                <h1>Who do you want to talk to?</h1>
-                <button className="chat-button" onClick={handleAIChat}>Talk to AI</button>
-                <button className="chat-button" onClick={handleFellowMatesChat}>Talk to Fellow Mates</button>
-
-                {/* Display buttons for specific tasks */}
-                <div className="task-container">
-                    <h2>Specific Topics:</h2>
-                    <button className="task-button" onClick={handleCrampsChat}>Cramps</button>
-                    <button className="task-button" onClick={handlePeriodsRelatedChat}>Periods Related Topics</button>
+        <div className="chat-app-container">
+            {/* Chat Header */}
+            <div className="chat-header">
+                <h2>Chat Room</h2>
+                <div className="header-actions">
+                    {user && (
+                        <>
+                            <button onClick={handleSetDisplayName}>
+                                {displayName ? "Change Name" : "Set Name"}
+                            </button>
+                            <button onClick={clearMessages}>Clear Messages</button>
+                        </>
+                    )}
                 </div>
-
-                {/* Display the room ID if one is selected */}
-                {roomId && (
-                    <div className="room-id-container">
-                        <h3>Your Room ID: {roomId}</h3>
-                        <p>Redirecting you to the chat in 3 seconds...</p>
-                    </div>
-                )}
             </div>
+
+            {/* Chat Messages */}
+            <div className="messages-container">
+                {messages.map((message) => (
+                    <div
+                        key={message.id}
+                        className={`message ${message.uid === user?.uid ? "own-message" : "other-message"
+                            }`}
+                    >
+                        <strong>{message.displayName || "Anonymous"}: </strong>
+                        {message.text}
+                    </div>
+                ))}
+            </div>
+
+            {/* Message Input */}
+            <form onSubmit={sendMessage} className="send-message-form">
+                <input
+                    type="text"
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="message-input"
+                />
+                <button type="submit" disabled={loading} className="send-button">
+                    {loading ? "Sending..." : "Send"}
+                </button>
+            </form>
         </div>
     );
 };
 
-export default Chat;
+export default ChatApp;
+
